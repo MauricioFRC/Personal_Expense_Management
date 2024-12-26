@@ -22,31 +22,314 @@
 
 ## CRUDs de las Entidades
 ### Usuarios
-- Creación: Permite crear un nuevo usuario.
-- Cambio de contraseña: Permite cambiar la contraseña del usuario.
-- Actualización: Permite actualizar datos del usuario, incluyendo opciones de Soft Delete y Bloqueo.
-- Login: Permite al usuario iniciar sesión, devolviendo un token de autenticación.
+- [x] Creación: Permite crear un nuevo usuario.
+- [x] Cambio de contraseña: Permite cambiar la contraseña del usuario.
+- [x] Actualización: Permite actualizar datos del usuario, incluyendo opciones de Soft Delete y Bloqueo.
+- [x] Login: Permite al usuario iniciar sesión, devolviendo un token de autenticación.
 
 ## Categorías de Gastos
-- Creación, Lectura, Actualización y Eliminación (CRUD): Permite gestionar las categorías de gastos de un usuario.
-Gastos
-- Creación, Lectura, Actualización y Eliminación (CRUD): Permite gestionar los gastos de un usuario.
+- [x] Creación, Lectura, Actualización y Eliminación (CRUD): Permite gestionar las categorías de gastos de un usuario.
+
+### Gastos
+- [x] Creación, Lectura, Actualización y Eliminación (CRUD): Permite gestionar los gastos de un usuario.
 
 ### Listar según filtros:
-- Página: Número de página (ej. ?pagina=1).
-- Tamaño de la página: Cantidad de elementos por página (ej. ?tamano_pagina=10).
-- Palabra: Texto a buscar en la descripción (sin distinción de mayúsculas ni acentos).
-- Categoría: Filtrar por ID de categoría.
+- [x] Página: Número de página (ej. ?pagina=1).
+- [x] Tamaño de la página: Cantidad de elementos por página (ej. ?tamano_pagina=10).
+- [x] Palabra: Texto a buscar en la descripción (sin distinción de mayúsculas ni acentos).
+- [x] Categoría: Filtrar por ID de categoría.
 Ordenamiento:
-- Monto: Ordenar los resultados por monto, de forma ascendente o descendente.
-- Fecha: Ordenar los resultados por fecha, de forma ascendente o descendente.
+- [x] Monto: Ordenar los resultados por monto, de forma ascendente o descendente.
+- [x] Fecha: Ordenar los resultados por fecha, de forma ascendente o descendente.
 
 ## Paginación
-- El listado de gastos debe ser paginado.
-- Número de página: Indica la página actual.
-- Tamaño de página: Cantidad de ítems por página.
-- Total de páginas: Calculado con base en el total de elementos y el tamaño de página.
+- [x] El listado de gastos debe ser paginado.
+- [x] Número de página: Indica la página actual.
+- [x] Tamaño de página: Cantidad de ítems por página.
+- [x] Total de páginas: Calculado con base en el total de elementos y el tamaño de página.
 
 ### Validaciones:
-- No permite valores negativos en los parámetros.
-- Ignora mayúsculas y acentos en la búsqueda.
+- [x] No permite valores negativos en los parámetros.
+- [x] Ignora mayúsculas y acentos en la búsqueda.
+
+## Endpoints Extras
+- [x] Generar un Qr pasando el {id} de un gasto.
+- [x] El Qr tendrá información como:
+    - El nombre del usuario al que esta relacionado el gasto.
+    - Monto del gasto.
+    - La fecha del gasto.
+    - La descripción del gasto.
+- [x] Obtener todos los usuarios utilizando páginado.
+
+### Paginación de usuarios:
+- [x] Número de página.
+- [x] Tamaño de la página.
+- [x] Ordenar por los campos de {IsDeleted} y {IsBlocked}
+
+# Endpoints
+
+### Category Expense
+
+`POST` `/create-category-expense`
+```json
+{
+  "name": "string",
+  "description": "string",
+  "userId": 0
+}
+```
+
+`GET` `get-category-expense/{id}`
+`Response Body`
+```json
+{
+  "id": 1,
+  "name": "Transporte",
+  "description": "Gastos de transporte como gasolina, transporte público, etc..",
+  "userId": 1,
+  "userName": "Jonh Doe"
+}
+```
+
+`PUT` `/update-category-expense/{id}`
+```json
+{
+  "name": "string",
+  "description": "string",
+  "userId": 0
+}
+```
+
+`Response Body`
+```json
+{
+  "id": 1,
+  "name": "Transporte",
+  "description": "Gastos de transporte como gasolina, transporte público",
+  "userId": 1,
+  "userName": "Jonh Doe"
+}
+```
+
+`DELETE` `/delete-category-expense/{id}`
+`Response Body`
+```json
+{
+  "id": 1,
+  "name": "Transporte",
+  "description": "Gastos de transporte como gasolina, transporte público",
+  "userId": 1,
+  "userName": "Jonh Doe"
+}
+```
+
+---
+
+### Expense
+`POST` `/create-expense`
+```json
+{
+  "amount": 0,
+  "date": "2024-12-26T17:11:55.966Z",
+  "description": "string",
+  "userId": 0,
+  "expenseCategoryId": 0
+}
+```
+
+`GET` `/get-expense/{id}`
+`Response Body`
+```json
+{
+  "id": 520,
+  "userId": 19,
+  "categoryExpenseId": 3,
+  "amount": 18.54,
+  "date": "6/5/2024",
+  "description": "Other intervertebral disc displacement, lumbar region",
+  "userName": "Mauricio",
+  "isDeleted": false,
+  "isBlocked": false,
+  "expenseCategoryName": "Entretenimiento"
+}
+```
+
+`GET` `/generate-expense-qr/{id}`
+`Response Body`
+`Generate a QR Image`
+#[qrimage](./img/qr.png)
+
+`GET` `/get-all-expenses`
+`Response Body`
+`Use a paginate, by default PageSize is 10, you can filter by a description an by a Category Expense Id`
+```json
+[
+  {
+    "id": 520,
+    "userId": 19,
+    "categoryExpenseId": 3,
+    "amount": 18.54,
+    "date": "6/5/2024",
+    "description": "Other intervertebral disc displacement, lumbar region",
+    "userName": "Mauricio",
+    "isDeleted": false,
+    "isBlocked": false,
+    "expenseCategoryName": "Entretenimiento"
+  },
+  {
+    "id": 1451,
+    "userId": 1,
+    "categoryExpenseId": 3,
+    "amount": 40.49,
+    "date": "3/1/2024",
+    "description": "Therapeutic and rehab radiological devices assoc w incdt",
+    "userName": "Brian Chaparro",
+    "isDeleted": true,
+    "isBlocked": false,
+    "expenseCategoryName": "Entretenimiento"
+  }
+]
+```
+
+`PUT` `/update-expense/{id}`
+```json
+{
+  "amount": 0,
+  "date": "2024-12-26T17:19:38.244Z",
+  "description": "string",
+  "userId": 0,
+  "expenseCategoryId": 0
+}
+```
+
+`Response Body`
+```json
+{
+  "id": 520,
+  "userId": 19,
+  "categoryExpenseId": 3,
+  "amount": 18,
+  "date": "26/12/2024",
+  "description": "Other intervertebral disc displacement",
+  "userName": "Mauricio",
+  "isDeleted": false,
+  "isBlocked": false,
+  "expenseCategoryName": "Entretenimiento"
+}
+```
+
+`DELETE` `/delete-expense/{id}`
+`Response Body`
+```json
+{
+  "id": 520,
+  "userId": 19,
+  "categoryExpenseId": 3,
+  "amount": 18,
+  "date": "26/12/2024",
+  "description": "Other intervertebral disc displacement",
+  "userName": "Mauricio",
+  "isDeleted": false,
+  "isBlocked": false,
+  "expenseCategoryName": "Entretenimiento"
+}
+```
+
+---
+
+### User
+`POST` `/create-user`
+```json
+{
+  "name": "string",
+  "email": "string",
+  "password": "string"
+}
+```
+
+`Response Body`
+```json
+{
+  "userId": 521,
+  "name": "test2",
+  "email": "test2@gmail.com",
+  "isDeleted": false,
+  "isBlocked": false,
+  "created_At": "26/12/2024",
+  "updated_At": "26/12/2024"
+}
+```
+
+`PUT` `/update-user-password`
+`[FromQuery]` `email`
+```json
+{
+  "verifyPassword": "string",
+  "newPassword": "string"
+}
+```
+
+`Response Body`
+`Contraseña cambiada con éxito`
+
+`PUT` `/update-user`
+`[FromQuery]` `email`
+```json
+{
+  "name": "string",
+  "email": "string",
+  "isDeleted": true,
+  "isBlocked": true
+}
+```
+
+`Response Body`
+```json
+{
+  "userId": 521,
+  "name": "test2user",
+  "email": "test2user@gmail.com",
+  "isDeleted": true,
+  "isBlocked": true,
+  "created_At": "26/12/2024",
+  "updated_At": "26/12/2024"
+}
+```
+
+`POST` `/login`
+```json
+{
+  "email": "string",
+  "password": "string"
+}
+```
+
+`Response Body`
+```cs
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1MjEiLCJuYW1lIjoidGVzdDJ1c2VyIiwianRpIjoiZmEwM2I2NzQtNmIxNS00M2U5LWIzZmUtODAwYTQyNDI4YzZkIiwiZXhwIjoxNzM1MjM4MjI1LCJpc3MiOiJDTFRBUEkiLCJhdWQiOiJodHRwczovL2xvY2FsaG9zdDo1MjcxIn0.iRtXYCMSErGTOWktd0J-t3PnJ7Bl66utquumJ_v_SVU
+```
+
+`GET` `/get-all-users`
+`Use a paginate, by default PageSize is 10, you can filter by a {IsDeleted} or {IsBlocked} boolean status.`
+```json
+[
+  {
+    "userId": 2,
+    "name": "Griselda SantaCruz",
+    "email": "griseldasantacruz@gmail.com",
+    "isDeleted": false,
+    "isBlocked": false,
+    "created_At": "18/12/2024",
+    "updated_At": "18/12/2024"
+  },
+  {
+    "userId": 15,
+    "name": "Mauricio",
+    "email": "mauricio@gmail.com",
+    "isDeleted": false,
+    "isBlocked": false,
+    "created_At": "20/12/2024",
+    "updated_At": "20/12/2024"
+  }
+]
+```

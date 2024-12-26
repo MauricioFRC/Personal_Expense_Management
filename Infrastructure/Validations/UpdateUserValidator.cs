@@ -17,9 +17,5 @@ public class UpdateUserValidator : AbstractValidator<UpdateUserDto>
             .NotEmpty()
             .NotNull()
             .EmailAddress();
-
-        RuleFor(x => x.IsDeleted)
-            .NotEmpty()
-            .NotNull();
     }
 }
