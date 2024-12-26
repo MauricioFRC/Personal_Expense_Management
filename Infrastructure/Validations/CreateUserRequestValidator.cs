@@ -8,8 +8,8 @@ public class CreateUserRequestValidator : AbstractValidator<CreateUserRequest>
 {
     // Minimum eight and maximum 10 characters, at least one uppercase letter,
     // one lowercase letter, one number and one special character
-    private readonly string validatePassword = @"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,10}$";
-    private readonly Regex regex;
+    //private readonly string validatePassword = @"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,10}$";
+    //private readonly Regex regex;
 
     public CreateUserRequestValidator()
     {

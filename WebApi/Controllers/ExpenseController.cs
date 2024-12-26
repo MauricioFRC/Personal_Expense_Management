@@ -41,9 +41,7 @@ public class ExpenseController : BaseApiController
     [HttpGet("generate-expense-qr/{id}")]
     public async Task<IActionResult> GenerateExpenseQr(int id, CancellationToken cancellationToken)
     {
-        var generatedQrImage = await _expenseService.GenerateExpenseQr(id, cancellationToken);
-
-        return File(generatedQrImage, "image/png");
+        return File(await _expenseService.GenerateExpenseQr(id, cancellationToken), "image/png");
     }
 
     [HttpGet("get-all-expenses")]

@@ -49,7 +49,7 @@ public class UserController : BaseApiController
         return Ok(await _userService.UpdateUser(email, updateUserDto, cancellationToken));
     }
 
-    [HttpPost("generate-token")]
+    [HttpPost("login")]
     public async Task<IActionResult> GenerateToken([FromBody] AuthenticateRequest authenticateRequest, CancellationToken cancellationToken)
     {
         return Ok(await _userService.CreateLoginToken(authenticateRequest, cancellationToken));

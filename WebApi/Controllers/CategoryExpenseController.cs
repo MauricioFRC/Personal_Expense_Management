@@ -28,7 +28,7 @@ public class CategoryExpenseController : BaseApiController
     {
         var result = await _createCategoryExpenseValidator.ValidateAsync(createCategoryExpenseRequest, cancellationToken);
 
-        if (!result.IsValid) return BadRequest(result.Errors);
+        if (!result.IsValid) return BadRequest(result.Errors.Select(x => new { x.PropertyName, x.ErrorMessage }));
 
         return Ok(await _categoryExpenseService.CreateCategoryExpense(createCategoryExpenseRequest, cancellationToken));
     }
@@ -44,7 +44,7 @@ public class CategoryExpenseController : BaseApiController
     {
         var result = await _updateCategoryExpenseValidator.ValidateAsync(updateCategoryExpenseDto, cancellationToken);
 
-        if (!result.IsValid) return BadRequest(result.Errors);
+        if (!result.IsValid) return BadRequest(result.Errors.Select(x => new { x.PropertyName, x.ErrorMessage }));
 
         return Ok(await _categoryExpenseService.UpdateCategoryExpense(id, updateCategoryExpenseDto, cancellationToken));
     }
