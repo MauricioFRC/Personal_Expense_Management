@@ -1,6 +1,7 @@
 ﻿using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions;
+using Core.DTOs.CategoryExpense;
 using Core.DTOs.Expense;
 using Core.Entities;
 using Core.Interfaces.Repository;
@@ -82,6 +83,37 @@ public class ExpenseRepository : IExpenseRepository
         await _context.SaveChangesAsync(cancellationToken);
 
         return updatedExpense.Adapt<ExpenseResponseDto>();
+    }
+
+    public async Task<List<ExpenseCategoryTotalDto>> GetExpenseTotalsByCategory(int UserId, CancellationToken cancellationToken)
+    {
+        var currentDate = DateTime.UtcNow;
+        var month = currentDate.Month;
+        var year = currentDate.Year;
+    
+        var result = await _context.Expenses
+            .Where(x => x.User.Id == UserId && x.Date.Month == month && x.Date.Year == year)
+            .GroupBy(x => x.ExpenseCategory.Name)
+            .Select(g => new ExpenseCategoryTotalDto
+            {
+                Category = g.Key,
+                Amount = g.Sum(x => x.Amount),
+            })
+            .ToListAsync(cancellationToken);
+
+        return result;
+    }
+
+    public async Task<List<ExpenseCategoryTotalDto>> GetProductRange(int range, CancellationToken cancellationToken)
+    {
+        var productRange = await _context.Expenses
+            .Include(x => x.User)
+            .Include(x => x.ExpenseCategory)
+            .Select(x => x).Take(range)
+            .OrderBy(x => x.Id)
+            .ToListAsync(cancellationToken);
+
+        return productRange.Adapt<List<ExpenseCategoryTotalDto>>();
     }
 
     private static string RemoveAccents(string text)

@@ -1,4 +1,6 @@
-﻿using Core.DTOs.Expense;
+﻿using System.Drawing;
+using Core.DTOs.CategoryExpense;
+using Core.DTOs.Expense;
 using Core.Interfaces.Service;
 using Core.Request;
 using FluentValidation;
@@ -63,5 +65,19 @@ public class ExpenseController : BaseApiController
     public async Task<IActionResult> DeleteExpense(int id, CancellationToken cancellationToken)
     {
         return Ok(await _expenseService.DeleteExpense(id, cancellationToken));
+    }
+
+    [HttpGet("generate-chart-report/{userId}")]
+    public async Task<IActionResult> GeneratePdfReport([FromRoute] int userId, CancellationToken cancellationToken)
+    {
+        var fileImage = await _expenseService.GenerateExpenseChartImg(userId, cancellationToken);
+        return File(fileImage, "image/png");
+    }
+
+    [HttpGet("get-pdf-expense-report/{range}")]
+    public async Task<IActionResult> GetPdfReport(int range, CancellationToken cancellationToken, [FromQuery] string fileName = "reporte_de_gastos")
+    {
+        var file = await _expenseService.GenerateExpensePdfReport(range, cancellationToken);
+        return File(file, "application/pdf", fileName + $"_cant={range}" + "_fecha=" + DateTime.UtcNow.ToShortDateString());
     }
 }

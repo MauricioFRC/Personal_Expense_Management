@@ -1,4 +1,5 @@
-﻿using Core.DTOs.Expense;
+﻿using Core.DTOs.CategoryExpense;
+using Core.DTOs.Expense;
 using Core.Entities;
 using Core.Request;
 using Mapster;
@@ -34,5 +35,11 @@ public class ExpenseMapping : IRegister
             .Map(dest => dest.Date, src => src.Date.ToShortDateString())
             .Map(dest => dest.Description, src => src.Description)
             .Map(dest => dest.Date, src => src.Date);
+
+        config.NewConfig<Expense, ExpenseCategoryTotalDto>()
+            .Map(dest => dest.UserId, src => src.Id)
+            .Map(dest => dest.Amount, src => src.Amount)
+            .Map(dest => dest.UserName, src => src.User.Name)
+            .Map(dest => dest.Category, src => src.ExpenseCategory.Name);
     }
 }

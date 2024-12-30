@@ -28,7 +28,7 @@ public class UserController : BaseApiController
     {
         var result = await _createUserRequestValidator.ValidateAsync(createUserRequest, cancellationToken);
 
-        if (!result.IsValid) return BadRequest(result.Errors);
+        if (!result.IsValid) return BadRequest(result.Errors.Select(x => new { x.PropertyName, x.ErrorMessage }));
 
         return Ok(await _userService.CreateUser(createUserRequest, cancellationToken));
     }
@@ -44,7 +44,7 @@ public class UserController : BaseApiController
     {
         var result = await _updateUserValidator.ValidateAsync(updateUserDto, cancellationToken);
 
-        if (!result.IsValid) return BadRequest(result.Errors);
+        if (!result.IsValid) return BadRequest(result.Errors.Select(x => new { x.PropertyName, x.ErrorMessage }));
 
         return Ok(await _userService.UpdateUser(email, updateUserDto, cancellationToken));
     }
