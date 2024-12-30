@@ -55,7 +55,7 @@ public class CategoryExpenseController : BaseApiController
         return Ok(await _categoryExpenseService.DeleteCategoryExpense(id, cancellationToken));
     }
 
-    [HttpGet("get-all-expense")]
+    [HttpGet("get-all-category-expense")]
     public async Task<IActionResult> GetAllCategoryExpense([FromQuery] ExpenseCategoryPaginationRequest expenseCategoryPaginationRequest, CancellationToken cancellationToken)
     {
         return Ok(await _categoryExpenseService.GetAllCategoryExpense(expenseCategoryPaginationRequest, cancellationToken));

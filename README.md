@@ -62,6 +62,7 @@ Ordenamiento:
 - [x] Obtener todos los usuarios utilizando páginado.
 - [x] Generar un reporte en un pdf de los gastos.
     - Se deberá proporcionar un rango para generar el reporte
+- [x] Generar un gráfico de barras segun la Categoría de Gastos
 
 ### Paginación de usuarios:
 - [x] Número de página.
@@ -127,6 +128,34 @@ Ordenamiento:
 }
 ```
 
+`GET` `/get-all-category-expense`
+
+`Response Body`
+```json
+[
+  {
+    "id": 3,
+    "name": "Entretenimiento",
+    "description": "Gastos de actividades recreativas como cine, conciertos, etc.",
+    "userId": 1,
+    "userName": "Brian Chaparro"
+  },
+  {
+    "id": 4,
+    "name": "Vivienda",
+    "description": "Alquiler, hipoteca, servicios de agua, luz, gas, etc.",
+    "userId": 2,
+    "userName": "Griselda SantaCruz"
+  },
+  {
+    "id": 9,
+    "name": "Transporte",
+    "description": "Gasolina, mantenimiento de vehículos, transporte público, taxis, etc.",
+    "userId": 1,
+    "userName": "Brian Chaparro"
+  }
+]
+```
 ---
 
 ### Expense
@@ -209,6 +238,8 @@ Ordenamiento:
   "userId": 0,
   "expenseCategoryId": 0
 }
+
+
 ```
 
 `Response Body`
@@ -246,6 +277,12 @@ Ordenamiento:
   "expenseCategoryName": "Entretenimiento"
 }
 ```
+`GET` `/generate-chart-report`
+
+`Response Body`
+
+`Generate a Chart Report in pdf format and you can asing a custom name with the {fileName} parameter`
+
 
 `GET` `/get-pdf-expense-report/{range}`
 
