@@ -92,7 +92,7 @@ public class UserService : IUserService
 
     private static void ValidateEmail(string email)
     {
-        if (string.IsNullOrEmpty(email)) throw new ArgumentNullException($"Verifique que el Email: {email} sea correcto");
+        if (string.IsNullOrEmpty(email) && email.Contains("@")) throw new ArgumentNullException($"Verifique que el Email: {email} sea correcto");
     }
 
     public async Task<List<CreateUserResponseDto>> ListUsers(UserPaginationRequest userPaginationRequest, CancellationToken cancellationToken)

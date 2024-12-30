@@ -1,5 +1,4 @@
-﻿using System.Globalization;
-using System.Text;
+﻿using System.Text;
 using System.Text.RegularExpressions;
 using Core.DTOs.CategoryExpense;
 using Core.DTOs.Expense;
@@ -85,23 +84,20 @@ public class ExpenseRepository : IExpenseRepository
         return updatedExpense.Adapt<ExpenseResponseDto>();
     }
 
-    public async Task<List<ExpenseCategoryTotalDto>> GetExpenseTotalsByCategory(int UserId, CancellationToken cancellationToken)
+    public async Task<List<ChartResponseDto>> ChartExpenseData(CancellationToken cancellationToken)
     {
-        var currentDate = DateTime.UtcNow;
-        var month = currentDate.Month;
-        var year = currentDate.Year;
-    
-        var result = await _context.Expenses
-            .Where(x => x.User.Id == UserId && x.Date.Month == month && x.Date.Year == year)
-            .GroupBy(x => x.ExpenseCategory.Name)
-            .Select(g => new ExpenseCategoryTotalDto
+        var expenseCategorySummaries = await _context.Expenses
+            .Include(e => e.ExpenseCategory)
+            //.Where(e => e.Date >= DateTime.Now.AddMonths(-6))
+            .GroupBy(e => e.ExpenseCategory.Name)
+            .Select(g => new ChartResponseDto
             {
                 Category = g.Key,
-                Amount = g.Sum(x => x.Amount),
+                TotalAmount = g.Sum(e => e.Amount)
             })
             .ToListAsync(cancellationToken);
 
-        return result;
+        return expenseCategorySummaries;
     }
 
     public async Task<List<ExpenseCategoryTotalDto>> GetProductRange(int range, CancellationToken cancellationToken)

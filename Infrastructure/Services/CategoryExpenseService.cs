@@ -14,6 +14,7 @@ public class CategoryExpenseService : ICategoryExpenseService
         _categoryExpenseRepository = categoryExpenseRepository;
     }
 
+    #region Crud
     public Task<CreateCategoryExpenseResponseDto> CreateCategoryExpense(CreateCategoryExpenseRequest createCategoryExpenseRequest, CancellationToken cancellationToken)
     {
         var createdCategory = _categoryExpenseRepository.CreateCategoryExpense(createCategoryExpenseRequest, cancellationToken)
@@ -49,8 +50,22 @@ public class CategoryExpenseService : ICategoryExpenseService
         return updatedCategory;
     }
 
+    public Task<List<CreateCategoryExpenseResponseDto>> GetAllCategoryExpense(ExpenseCategoryPaginationRequest expenseCategoryPaginationRequest, CancellationToken cancellationToken)
+    {
+        if (expenseCategoryPaginationRequest.Page <= 0 && expenseCategoryPaginationRequest.Page <= 0)
+            throw new ArgumentOutOfRangeException("La pagina y el tamaño de la pagina deben ser mayores a 0");
+
+        var allCategories = _categoryExpenseRepository.GetAllCategoryExpense(expenseCategoryPaginationRequest, cancellationToken)
+            ?? throw new ArgumentNullException("No se encontraron categorias de gastos");
+
+        return allCategories;
+    }
+    #endregion
+
+    #region Private Methods
     private static void Validate(int id)
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(id);
     }
+    #endregion
 }

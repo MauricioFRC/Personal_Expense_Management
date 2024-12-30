@@ -61,4 +61,16 @@ public class CategoryExpenseRepository : ICategoryExpenseRepository
 
         return searchedCategory.Adapt<CreateCategoryExpenseResponseDto>();
     }
+
+    public async Task<List<CreateCategoryExpenseResponseDto>> GetAllCategoryExpense(ExpenseCategoryPaginationRequest expenseCategoryPaginationRequest, CancellationToken cancellationToken)
+    {
+        var categoryList = await _context.ExpenseCategories
+            .Include(x => x.User)
+            .OrderBy(x => x.Id)
+            .Skip((expenseCategoryPaginationRequest.Page - 1) * expenseCategoryPaginationRequest.PageSize)
+            .Take(expenseCategoryPaginationRequest.PageSize)
+            .ToListAsync(cancellationToken);
+
+        return categoryList.Adapt<List<CreateCategoryExpenseResponseDto>>();
+    }
 }

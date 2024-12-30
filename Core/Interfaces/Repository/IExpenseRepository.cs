@@ -11,7 +11,6 @@ public interface IExpenseRepository
     public Task<ExpenseResponseDto> DeleteExpense(int id, CancellationToken cancellationToken);
     public Task<List<ExpenseResponseDto>> GetAllExpense(PaginationRequest paginationRequest, CancellationToken cancellationToken);
     public Task<ExpenseResponseDto> UpdateExpense(int id, UpdateExpenseDto updateExpenseDto, CancellationToken cancellationToken);
-    public Task<List<ExpenseCategoryTotalDto>> GetExpenseTotalsByCategory(int UserId, CancellationToken cancellationToken);
-
+    public Task<List<ChartResponseDto>> ChartExpenseData(CancellationToken cancellationToken);
     public Task<List<ExpenseCategoryTotalDto>> GetProductRange(int range, CancellationToken cancellationToken);
 }

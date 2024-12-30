@@ -1,5 +1,5 @@
 ﻿using System.Text;
-using Core.DTOs.CategoryExpense;
+using ClosedXML.Excel;
 using Core.DTOs.Expense;
 using Core.Interfaces.Repository;
 using Core.Interfaces.Service;
@@ -7,7 +7,6 @@ using Core.Request;
 using OxyPlot;
 using OxyPlot.Axes;
 using OxyPlot.Series;
-using OxyPlot.Wpf;
 using QRCoder;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
@@ -19,11 +18,16 @@ public class ExpenseService : IExpenseService
 {
     private readonly IExpenseRepository _expenseRepository;
 
+#nullable disable
+    public ExpenseService() {}
+#nullable enable
+
     public ExpenseService(IExpenseRepository expenseRepository)
     {
         _expenseRepository = expenseRepository;
     }
 
+    #region Crud Region
     public async Task<ExpenseResponseDto> CreateExpense(CreateExpenseRequest createExpenseRequest, CancellationToken cancellationToken)
     {
         var createdExpense = await _expenseRepository.CreateExpense(createExpenseRequest, cancellationToken)
@@ -62,6 +66,17 @@ public class ExpenseService : IExpenseService
         return searchedExpense;
     }
 
+    public async Task<ExpenseResponseDto> UpdateExpense(int id, UpdateExpenseDto updateExpenseDto, CancellationToken cancellationToken)
+    {
+        ValidateId(id);
+        var updatedExpense = await _expenseRepository.UpdateExpense(id, updateExpenseDto, cancellationToken)
+            ?? throw new NullReferenceException($"No se pudo actualizar el gasto con el id: {id}");
+
+        return updatedExpense;
+    }
+    #endregion
+
+    #region Documents Create Region
     public async Task<byte[]> GenerateExpenseQr(int id, CancellationToken cancellationToken)
     {
         ValidateId(id);
@@ -88,15 +103,6 @@ public class ExpenseService : IExpenseService
         }
     }
 
-    public async Task<ExpenseResponseDto> UpdateExpense(int id, UpdateExpenseDto updateExpenseDto, CancellationToken cancellationToken)
-    {
-        ValidateId(id);
-        var updatedExpense = await _expenseRepository.UpdateExpense(id, updateExpenseDto, cancellationToken)
-            ?? throw new NullReferenceException($"No se pudo actualizar el gasto con el id: {id}");
-
-        return updatedExpense;
-    }
-
     public async Task<byte[]> GenerateExpensePdfReport(int range, CancellationToken cancellationToken)
     {
         QuestPDF.Settings.License = LicenseType.Community;
@@ -120,9 +126,7 @@ public class ExpenseService : IExpenseService
                     table.ColumnsDefinition(columns =>
                     {
                         columns.RelativeColumn(1);
-                        //columns.RelativeColumn(3);
                         columns.RelativeColumn(2);
-                        //columns.RelativeColumn(3);
                         columns.RelativeColumn(1);
                         columns.RelativeColumn(2);
                     });
@@ -154,68 +158,84 @@ public class ExpenseService : IExpenseService
         return stream.ToArray();
     }
 
+    public async Task<byte[]> GenerateExpenseExcelReport(int range, CancellationToken CancellationToken)
+    {
+        ValidateId(range);
+
+        var products = await _expenseRepository.GetProductRange(range, CancellationToken)
+            ?? throw new ArgumentNullException($"No se encontraron gastos en el rango de {range}");
+
+        using var workbook = new XLWorkbook();
+
+        var worksheet = workbook.AddWorksheet("REPORTE DE GASTOS");
+
+        worksheet.Cell(1, 1).Value = "Id";
+        worksheet.Cell(1, 2).Value = "User";
+        worksheet.Cell(1, 3).Value = "Category";
+        worksheet.Cell(1, 4).Value = "Amount";
+
+        int row = 2;
+        foreach (var product in products)
+        {
+            worksheet.Cell(row, 1).Value = product.UserId.ToString();
+            worksheet.Cell(row, 2).Value = product.UserName;
+            worksheet.Cell(row, 3).Value = product.Category ?? "Sin categoría";
+            worksheet.Cell(row, 4).Value = product.Amount.ToString();
+            row++;
+        }
+
+        worksheet.Columns().AdjustToContents();
+
+        using var memoryStream = new MemoryStream();
+        workbook.SaveAs(memoryStream);
+        return memoryStream.ToArray();
+    }
+
+    public async Task<byte[]> GenerateExpenseChart(CancellationToken cancellationToken)
+    {
+        var expenseCategoriesTotalDto = await _expenseRepository.ChartExpenseData(cancellationToken)
+            ?? throw new ArgumentNullException("No se encontraron datos para generar el grafico");
+
+        var plotModel = new PlotModel { Title = "Gastos por categoría" };
+
+        var barSeries = new BarSeries
+        {
+            Title = "Gastos",
+            StrokeColor = OxyColors.Black,
+            StrokeThickness = 1
+        };
+
+        foreach (var product in expenseCategoriesTotalDto)
+        {
+            barSeries.Items.Add(new BarItem { Value = (double)product.TotalAmount, Color = OxyColor.Parse("#FF5733") });
+        }
+
+        plotModel.Series.Add(barSeries);
+
+        var categoryAxis = new CategoryAxis
+        {
+            Position = AxisPosition.Bottom,
+            Title = "Categoría",
+        };
+
+        foreach (var expense in expenseCategoriesTotalDto)
+        {
+            categoryAxis.Labels.Add(expense.Category);
+        }
+
+        plotModel.Axes.Add(categoryAxis);
+
+        var pngExporter = new PdfExporter { Width = 1280, Height = 720 };
+        using var stream = new MemoryStream();
+        pngExporter.Export(plotModel, stream);
+        return stream.ToArray();
+    }
+    #endregion
+
+    #region Private Methods
     private static void ValidateId(int id)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(id);
     }
-
-    public async Task<byte[]> GenerateExpenseChartImg(List<ExpenseCategoryTotalDto> expenseCategoryTotalDtos, CancellationToken cancellationToken)
-    {
-        var plotModel = new PlotModel { Title = "Totales por categoría" };
-
-        var barSeries = new BarSeries
-        {
-            ItemsSource = expenseCategoryTotalDtos.Select(e => new BarItem { Value = (double)e.Amount }).ToList(),
-            LabelPlacement = LabelPlacement.Outside,
-            LabelFormatString = "{0:..00}"
-        };
-
-        plotModel.Series.Add(barSeries);
-
-        plotModel.Axes.Add(new CategoryAxis
-        {
-            Position = AxisPosition.Bottom,
-            Key = "Categorias",
-            ItemsSource = expenseCategoryTotalDtos.Select(x => x.Category).ToList()
-        });
-
-        using (var memoryStream = new MemoryStream())
-        {
-            var exporter = new PngExporter { Width = 600, Height = 400 };
-            exporter.Export(plotModel, memoryStream);
-            return memoryStream.ToArray();
-        }
-    }
-
-    public async Task<byte[]> GenerateExpenseChartImg(int userId, CancellationToken cancellationToken)
-    {
-        var expenseCategoriesTotalDto = await _expenseRepository.GetExpenseTotalsByCategory(userId, cancellationToken)
-            ?? throw new ArgumentNullException($"No se encontró ningun gasto para el usuario con el id: {userId}");
-
-        var plotModel = new PlotModel { Title = "Totales por categoría" };
-
-        var barSeries = new BarSeries
-        {
-            ItemsSource = expenseCategoriesTotalDto.Select(e => new BarItem { Value = (double)e.Amount }).ToList(),
-            LabelPlacement = LabelPlacement.Outside,
-            LabelFormatString = "{0:F2}"
-        };
-
-        plotModel.Series.Add(barSeries);
-
-        plotModel.Axes.Add(new CategoryAxis
-        {
-            Position = AxisPosition.Bottom,
-            Key = "Categorias",
-            ItemsSource = expenseCategoriesTotalDto.Select(x => x.Category).ToList()
-        });
-
-        // Generar la imagen del gráfico en memoria
-        using (var memoryStream = new MemoryStream())
-        {
-            var exporter = new PngExporter { Width = 600, Height = 400 };
-            exporter.Export(plotModel, memoryStream);
-            return memoryStream.ToArray();
-        }
-    }
+    #endregion
 }

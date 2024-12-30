@@ -1,6 +1,4 @@
-﻿using System.Drawing;
-using Core.DTOs.CategoryExpense;
-using Core.DTOs.Expense;
+﻿using Core.DTOs.Expense;
 using Core.Interfaces.Service;
 using Core.Request;
 using FluentValidation;
@@ -67,11 +65,13 @@ public class ExpenseController : BaseApiController
         return Ok(await _expenseService.DeleteExpense(id, cancellationToken));
     }
 
-    [HttpGet("generate-chart-report/{userId}")]
-    public async Task<IActionResult> GeneratePdfReport([FromRoute] int userId, CancellationToken cancellationToken)
+    public IEnumerable<string> TiposGraficos = ["Pay", "Pay2", "Pay3"];
+
+    [HttpGet("generate-chart-report")]
+    public async Task<IActionResult> GeneratePdfChartReport(CancellationToken cancellationToken, [FromRoute] string fileName = "grafico_reporte")
     {
-        var fileImage = await _expenseService.GenerateExpenseChartImg(userId, cancellationToken);
-        return File(fileImage, "image/png");
+        var fileChartPdf = await _expenseService.GenerateExpenseChart(cancellationToken);
+        return File(fileChartPdf, "application/pdf", fileName + "_generated_at=" + DateTime.UtcNow.ToShortDateString());
     }
 
     [HttpGet("get-pdf-expense-report/{range}")]
@@ -79,5 +79,12 @@ public class ExpenseController : BaseApiController
     {
         var file = await _expenseService.GenerateExpensePdfReport(range, cancellationToken);
         return File(file, "application/pdf", fileName + $"_cant={range}" + "_fecha=" + DateTime.UtcNow.ToShortDateString());
+    }
+
+    [HttpGet("get-excel-expense-report/{range}")]
+    public async Task<IActionResult> GetExcelReport(int range, CancellationToken cancellationToken, [FromQuery] string fileName = "reporte_de_gastos")
+    {
+        var file = await _expenseService.GenerateExpenseExcelReport(range, cancellationToken);
+        return File(file, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName + $"_cant={range}" + "_fecha=" + DateTime.UtcNow.ToShortDateString());
     }
 }
