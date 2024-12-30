@@ -60,6 +60,8 @@ Ordenamiento:
     - La fecha del gasto.
     - La descripción del gasto.
 - [x] Obtener todos los usuarios utilizando páginado.
+- [x] Generar un reporte en un pdf de los gastos.
+    - Se deberá proporcionar un rango para generar el reporte
 
 ### Paginación de usuarios:
 - [x] Número de página.
@@ -80,6 +82,7 @@ Ordenamiento:
 ```
 
 `GET` `get-category-expense/{id}`
+
 `Response Body`
 ```json
 {
@@ -112,6 +115,7 @@ Ordenamiento:
 ```
 
 `DELETE` `/delete-category-expense/{id}`
+
 `Response Body`
 ```json
 {
@@ -138,6 +142,7 @@ Ordenamiento:
 ```
 
 `GET` `/get-expense/{id}`
+
 `Response Body`
 ```json
 {
@@ -155,12 +160,16 @@ Ordenamiento:
 ```
 
 `GET` `/generate-expense-qr/{id}`
+
 `Response Body`
+
 `Generate a QR Image`
-#[qrimage](./img/qr.png)
+![qrimage](./img/qr.png)
 
 `GET` `/get-all-expenses`
+
 `Response Body`
+
 `Use a paginate, by default PageSize is 10, you can filter by a description an by a Category Expense Id`
 ```json
 [
@@ -203,6 +212,7 @@ Ordenamiento:
 ```
 
 `Response Body`
+
 ```json
 {
   "id": 520,
@@ -219,7 +229,9 @@ Ordenamiento:
 ```
 
 `DELETE` `/delete-expense/{id}`
+
 `Response Body`
+
 ```json
 {
   "id": 520,
@@ -235,10 +247,21 @@ Ordenamiento:
 }
 ```
 
+`GET` `/get-pdf-expense-report/{range}`
+
+`Response Body`
+
+`The Endpoint will return a pdf file with the expense report for the given range`
+
+```sh
+Download file
+```
+
 ---
 
 ### User
 `POST` `/create-user`
+
 ```json
 {
   "name": "string",
@@ -261,6 +284,7 @@ Ordenamiento:
 ```
 
 `PUT` `/update-user-password`
+
 `[FromQuery]` `email`
 ```json
 {
@@ -270,9 +294,11 @@ Ordenamiento:
 ```
 
 `Response Body`
+
 `Contraseña cambiada con éxito`
 
 `PUT` `/update-user`
+
 `[FromQuery]` `email`
 ```json
 {
@@ -284,6 +310,7 @@ Ordenamiento:
 ```
 
 `Response Body`
+
 ```json
 {
   "userId": 521,
@@ -297,6 +324,7 @@ Ordenamiento:
 ```
 
 `POST` `/login`
+
 ```json
 {
   "email": "string",
@@ -305,12 +333,15 @@ Ordenamiento:
 ```
 
 `Response Body`
+
 ```cs
 eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1MjEiLCJuYW1lIjoidGVzdDJ1c2VyIiwianRpIjoiZmEwM2I2NzQtNmIxNS00M2U5LWIzZmUtODAwYTQyNDI4YzZkIiwiZXhwIjoxNzM1MjM4MjI1LCJpc3MiOiJDTFRBUEkiLCJhdWQiOiJodHRwczovL2xvY2FsaG9zdDo1MjcxIn0.iRtXYCMSErGTOWktd0J-t3PnJ7Bl66utquumJ_v_SVU
 ```
 
 `GET` `/get-all-users`
+
 `Use a paginate, by default PageSize is 10, you can filter by a {IsDeleted} or {IsBlocked} boolean status.`
+
 ```json
 [
   {
